@@ -521,21 +521,7 @@ The test performs the following operations:
 
 The test prints HTTP requests, JSON responses and verification results.
 
-## 11. Technology stack
-
-| Technology | Usage |
-|---|---|
-| Go | Microservice implementation |
-| HTTP / REST | Inter-service communication |
-| JSON | API request and response format |
-| Protobuf | API and message schema definitions |
-| Python | End-to-end integration testing |
-| CSV / Text files | File-based data persistence |
-| Linux system calls | File locking |
-
-**Note:** Protobuf definitions are included in the project, but the current runtime microservices communicate using HTTP/JSON rather than gRPC.
-
-## 12. Key design decisions
+## 11. Key design decisions
 
 - IP Pool is the single owner of the IP inventory.
 - IPAM and DHCP communicate with IP Pool through HTTP APIs.
