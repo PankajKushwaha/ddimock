@@ -15,7 +15,7 @@ The main objectives are:
 - Demonstrate independent microservices communicating over HTTP.
 - Protect shared IP inventory from concurrent modifications.
 
-This is a learning and demonstration project, not a production-ready DDI platform.
+There are 4 different microservice this project:
 
 ### 1. IP Pool Service
 ![IP Pool Service](docs/images/ip-pool-service.png)
