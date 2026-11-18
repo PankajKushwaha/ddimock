@@ -1,6 +1,0 @@
-if ip is assign through ipam and static and fix , then it can only be release manuall , no lease
-
-if assign by dhcp , then lease will remove it
-
-only ip which is not allocated can be delete , 
-if allocated ip need to delete then first deallocate ip then delete it.
