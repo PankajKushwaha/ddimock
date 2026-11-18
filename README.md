@@ -29,6 +29,9 @@ There are 4 different microservice this project:
 ### 4. DNS Service
 ![DNS Service](docs/images/dns-service.png)
 
+### 5. Test Image
+![Test Image](docs/images/test.png)
+
 ## 2. Architecture
 
 The project contains three primary DDI microservices and one supporting IP Pool microservice.
