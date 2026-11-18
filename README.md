@@ -17,6 +17,18 @@ The main objectives are:
 
 This is a learning and demonstration project, not a production-ready DDI platform.
 
+### 1. IP Pool Service
+![IP Pool Service](docs/images/ip-pool-service.png)
+
+### 2. IPAM Service
+![IPAM Service](docs/images/ipam-service.png)
+
+### 3. DHCP Service
+![DHCP Service](docs/images/dhcp-service.png)
+
+### 4. DNS Service
+![DNS Service](docs/images/dns-service.png)
+
 ## 2. Architecture
 
 The project contains three primary DDI microservices and one supporting IP Pool microservice.
