@@ -14,6 +14,12 @@ enum IPState {
     IP_STATE_QUARANTINE = 4;
 }
 
+enum AllocationType {
+  ALLOCATION_TYPE_UNSPECIFIED = 0;
+  ALLOCATION_TYPE_STATIC = 1;
+  ALLOCATION_TYPE_DHCP = 2;
+}
+
 message Network {
     string cidr = 1;
     string name = 2;
@@ -28,6 +34,8 @@ message IPAddress {
     string hostname = 4;
     string mac_address = 5;
     string owner = 6;
+    AllocationType allocation_type = 8;
+    string lease_id = 9;
     google.protobuf.Timestamp last_updated = 7;
 }
 

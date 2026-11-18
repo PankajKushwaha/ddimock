@@ -1,0 +1,823 @@
+
+===================================
+ DDI MICROSERVICE INTEGRATION TEST
+===================================
+
+===================================
+ CHECKING MICROSERVICES
+===================================
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5004/health
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "service": "IP-POOL",
+    "status": "UP"
+}
+[92m[OK] IP-POOL is running[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5001/health
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "service": "IPAM",
+    "status": "UP"
+}
+[92m[OK] IPAM is running[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5002/health
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "service": "DHCP",
+    "status": "UP"
+}
+[92m[OK] DHCP is running[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5003/health
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "service": "DNS",
+    "status": "UP"
+}
+[92m[OK] DNS is running[0m
+[92m[OK] All four microservices are running.[0m
+
+===================================
+ IPAM + DNS END-TO-END TEST
+===================================
+
+[93m1. Allocating IP through IPAM...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : POST
+  URL    : http://localhost:5001/allocate
+  JSON   :
+{
+    "network": "192.0.2.0/24",
+    "hostname": "app-01.example.com",
+    "mac": "aa:bb:cc:00:00:50"
+}
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "IP": "192.0.2.1",
+    "Network": "192.0.2.0/24",
+    "State": "ALLOCATED",
+    "Hostname": "app-01.example.com",
+    "MAC": "aa:bb:cc:00:00:50",
+    "Owner": "ipam",
+    "LastUpdated": "2026-11-18T10:19:09Z"
+}
+[92m[OK] Allocated IP: 192.0.2.1[0m
+
+[93m2. Creating DNS zone...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : POST
+  URL    : http://localhost:5003/zones
+  JSON   :
+{
+    "zone": "example.com"
+}
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "status": "created",
+    "zone": "example.com"
+}
+[92m[OK] DNS zone created[0m
+
+[93m3. Creating DNS A record...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : POST
+  URL    : http://localhost:5003/records
+  JSON   :
+{
+    "name": "app-01.example.com",
+    "type": "A",
+    "value": "192.0.2.1",
+    "ttl": "300",
+    "zone": "example.com"
+}
+
+  [92m[HTTP RESPONSE][0m
+  Status : 201
+  JSON   :
+{
+    "Name": "app-01.example.com",
+    "Type": "A",
+    "Value": "192.0.2.1",
+    "TTL": "300",
+    "Zone": "example.com"
+}
+[92m[OK] DNS record created[0m
+
+[93m4. Verifying IP allocation...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5001/ips
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+[
+    {
+        "IP": "192.0.2.1",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "app-01.example.com",
+        "MAC": "aa:bb:cc:00:00:50",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T10:19:09Z"
+    },
+    {
+        "IP": "192.0.2.2",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.3",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.10",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "web-01.example.com",
+        "MAC": "aa:bb:cc:00:00:01",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T10:00:00Z"
+    },
+    {
+        "IP": "192.0.2.11",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "web-02.example.com",
+        "MAC": "aa:bb:cc:00:00:02",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T10:05:00Z"
+    },
+    {
+        "IP": "192.0.2.20",
+        "Network": "192.0.2.0/24",
+        "State": "RESERVED",
+        "Hostname": "dhcp-client-1",
+        "MAC": "aa:bb:cc:00:00:20",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T10:10:00Z"
+    },
+    {
+        "IP": "192.0.2.21",
+        "Network": "192.0.2.0/24",
+        "State": "RESERVED",
+        "Hostname": "dhcp-client-2",
+        "MAC": "aa:bb:cc:00:00:21",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T10:12:00Z"
+    },
+    {
+        "IP": "192.0.2.30",
+        "Network": "192.0.2.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T09:00:00Z"
+    },
+    {
+        "IP": "192.0.2.31",
+        "Network": "192.0.2.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T09:05:00Z"
+    },
+    {
+        "IP": "192.0.2.40",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.41",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.100",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "db-01.example.com",
+        "MAC": "aa:bb:cc:00:01:00",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.101",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:30:00Z"
+    },
+    {
+        "IP": "10.0.0.1",
+        "Network": "10.0.0.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "10.0.0.10",
+        "Network": "10.0.0.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "api-gw.example.com",
+        "MAC": "aa:bb:cc:00:02:00",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T11:00:00Z"
+    },
+    {
+        "IP": "10.0.0.11",
+        "Network": "10.0.0.0/24",
+        "State": "RESERVED",
+        "Hostname": "lb-01",
+        "MAC": "aa:bb:cc:00:02:01",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T11:05:00Z"
+    },
+    {
+        "IP": "10.0.0.50",
+        "Network": "10.0.0.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T07:00:00Z"
+    }
+]
+[92m[OK] IP allocation verified[0m
+
+[93m5. Verifying DNS record...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5003/records?name=app-01.example.com&type=A&zone=example.com
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "Name": "app-01.example.com",
+    "Type": "A",
+    "Value": "192.0.2.1",
+    "TTL": "300",
+    "Zone": "example.com"
+}
+[92m[OK] DNS record verified: app-01.example.com -> 192.0.2.1[0m
+
+[93m6. Releasing IP through IPAM...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : POST
+  URL    : http://localhost:5001/release
+  JSON   :
+{
+    "ip": "192.0.2.1"
+}
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "status": "released"
+}
+[92m[OK] IP released[0m
+
+[93m7. Deleting DNS record...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : DELETE
+  URL    : http://localhost:5003/records?name=app-01.example.com&type=A&zone=example.com
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "status": "deleted"
+}
+[92m[OK] DNS record deleted[0m
+
+[92mIPAM + DNS TEST PASSED[0m
+
+===================================
+ DHCP END-TO-END TEST
+===================================
+
+[93m1. Requesting IP through DHCP...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : POST
+  URL    : http://localhost:5002/allocate
+  JSON   :
+{
+    "network": "192.0.2.0/24",
+    "hostname": "dhcp-client-01.example.com",
+    "mac": "aa:bb:cc:00:00:60",
+    "duration_seconds": 120
+}
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "id": "1794997150052683863",
+    "ip": "192.0.2.1",
+    "hostname": "dhcp-client-01.example.com",
+    "mac": "aa:bb:cc:00:00:60",
+    "expires_at": "2026-11-18T15:51:10.052692819+05:30"
+}
+[92m[OK] DHCP allocated IP: 192.0.2.1[0m
+[92m[OK] Lease ID: 1794997150052683863[0m
+
+[93m2. Verifying DHCP lease...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5002/leases
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+[
+    {
+        "id": "1794997150052683863",
+        "ip": "192.0.2.1",
+        "hostname": "dhcp-client-01.example.com",
+        "mac": "aa:bb:cc:00:00:60",
+        "expires_at": "2026-11-18T15:51:10.052692819+05:30"
+    }
+]
+[92m[OK] DHCP lease verified[0m
+
+[93m3. Verifying IP Pool allocation...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5004/ips
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+[
+    {
+        "IP": "192.0.2.1",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "dhcp-client-01.example.com",
+        "MAC": "aa:bb:cc:00:00:60",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T10:19:09Z"
+    },
+    {
+        "IP": "192.0.2.2",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.3",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.10",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "web-01.example.com",
+        "MAC": "aa:bb:cc:00:00:01",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T10:00:00Z"
+    },
+    {
+        "IP": "192.0.2.11",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "web-02.example.com",
+        "MAC": "aa:bb:cc:00:00:02",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T10:05:00Z"
+    },
+    {
+        "IP": "192.0.2.20",
+        "Network": "192.0.2.0/24",
+        "State": "RESERVED",
+        "Hostname": "dhcp-client-1",
+        "MAC": "aa:bb:cc:00:00:20",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T10:10:00Z"
+    },
+    {
+        "IP": "192.0.2.21",
+        "Network": "192.0.2.0/24",
+        "State": "RESERVED",
+        "Hostname": "dhcp-client-2",
+        "MAC": "aa:bb:cc:00:00:21",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T10:12:00Z"
+    },
+    {
+        "IP": "192.0.2.30",
+        "Network": "192.0.2.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T09:00:00Z"
+    },
+    {
+        "IP": "192.0.2.31",
+        "Network": "192.0.2.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T09:05:00Z"
+    },
+    {
+        "IP": "192.0.2.40",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.41",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.100",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "db-01.example.com",
+        "MAC": "aa:bb:cc:00:01:00",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.101",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:30:00Z"
+    },
+    {
+        "IP": "10.0.0.1",
+        "Network": "10.0.0.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "10.0.0.10",
+        "Network": "10.0.0.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "api-gw.example.com",
+        "MAC": "aa:bb:cc:00:02:00",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T11:00:00Z"
+    },
+    {
+        "IP": "10.0.0.11",
+        "Network": "10.0.0.0/24",
+        "State": "RESERVED",
+        "Hostname": "lb-01",
+        "MAC": "aa:bb:cc:00:02:01",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T11:05:00Z"
+    },
+    {
+        "IP": "10.0.0.50",
+        "Network": "10.0.0.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T07:00:00Z"
+    }
+]
+[92m[OK] IP Pool confirms DHCP allocation[0m
+
+[93m4. Renewing DHCP lease...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : POST
+  URL    : http://localhost:5002/renew
+  JSON   :
+{
+    "lease_id": "1794997150052683863",
+    "duration_seconds": 300
+}
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "id": "1794997150052683863",
+    "ip": "192.0.2.1",
+    "hostname": "dhcp-client-01.example.com",
+    "mac": "aa:bb:cc:00:00:60",
+    "expires_at": "2026-11-18T15:54:10.060614149+05:30"
+}
+[92m[OK] DHCP lease renewal request completed[0m
+
+[93m5. Verifying renewed DHCP lease...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5002/leases
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+[
+    {
+        "id": "1794997150052683863",
+        "ip": "192.0.2.1",
+        "hostname": "dhcp-client-01.example.com",
+        "mac": "aa:bb:cc:00:00:60",
+        "expires_at": "2026-11-18T15:54:10.060614149+05:30"
+    }
+]
+  Renewed lease details:
+{
+    "id": "1794997150052683863",
+    "ip": "192.0.2.1",
+    "hostname": "dhcp-client-01.example.com",
+    "mac": "aa:bb:cc:00:00:60",
+    "expires_at": "2026-11-18T15:54:10.060614149+05:30"
+}
+[92m[OK] DHCP lease renewal verified[0m
+
+[93m6. Releasing DHCP lease...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : POST
+  URL    : http://localhost:5002/release
+  JSON   :
+{
+    "lease_id": "1794997150052683863"
+}
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+{
+    "status": "released"
+}
+[92m[OK] DHCP lease released[0m
+
+[93m7. Verifying DHCP lease removal...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5002/leases
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+[]
+[92m[OK] DHCP lease removed[0m
+
+[93m8. Verifying IP returned to AVAILABLE state...[0m
+
+  [96m[HTTP REQUEST][0m
+  Method : GET
+  URL    : http://localhost:5004/ips
+
+  [92m[HTTP RESPONSE][0m
+  Status : 200
+  JSON   :
+[
+    {
+        "IP": "192.0.2.1",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T10:19:10Z"
+    },
+    {
+        "IP": "192.0.2.2",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.3",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.10",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "web-01.example.com",
+        "MAC": "aa:bb:cc:00:00:01",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T10:00:00Z"
+    },
+    {
+        "IP": "192.0.2.11",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "web-02.example.com",
+        "MAC": "aa:bb:cc:00:00:02",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T10:05:00Z"
+    },
+    {
+        "IP": "192.0.2.20",
+        "Network": "192.0.2.0/24",
+        "State": "RESERVED",
+        "Hostname": "dhcp-client-1",
+        "MAC": "aa:bb:cc:00:00:20",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T10:10:00Z"
+    },
+    {
+        "IP": "192.0.2.21",
+        "Network": "192.0.2.0/24",
+        "State": "RESERVED",
+        "Hostname": "dhcp-client-2",
+        "MAC": "aa:bb:cc:00:00:21",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T10:12:00Z"
+    },
+    {
+        "IP": "192.0.2.30",
+        "Network": "192.0.2.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T09:00:00Z"
+    },
+    {
+        "IP": "192.0.2.31",
+        "Network": "192.0.2.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T09:05:00Z"
+    },
+    {
+        "IP": "192.0.2.40",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.41",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.100",
+        "Network": "192.0.2.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "db-01.example.com",
+        "MAC": "aa:bb:cc:00:01:00",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "192.0.2.101",
+        "Network": "192.0.2.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:30:00Z"
+    },
+    {
+        "IP": "10.0.0.1",
+        "Network": "10.0.0.0/24",
+        "State": "AVAILABLE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T08:00:00Z"
+    },
+    {
+        "IP": "10.0.0.10",
+        "Network": "10.0.0.0/24",
+        "State": "ALLOCATED",
+        "Hostname": "api-gw.example.com",
+        "MAC": "aa:bb:cc:00:02:00",
+        "Owner": "ipam",
+        "LastUpdated": "2026-11-18T11:00:00Z"
+    },
+    {
+        "IP": "10.0.0.11",
+        "Network": "10.0.0.0/24",
+        "State": "RESERVED",
+        "Hostname": "lb-01",
+        "MAC": "aa:bb:cc:00:02:01",
+        "Owner": "dhcp",
+        "LastUpdated": "2026-11-18T11:05:00Z"
+    },
+    {
+        "IP": "10.0.0.50",
+        "Network": "10.0.0.0/24",
+        "State": "QUARANTINE",
+        "Hostname": "",
+        "MAC": "",
+        "Owner": "",
+        "LastUpdated": "2026-11-18T07:00:00Z"
+    }
+]
+[92m[OK] IP 192.0.2.1 returned to AVAILABLE state[0m
+
+[92mDHCP TEST PASSED[0m
+
+===================================
+[92m ALL TESTS COMPLETED SUCCESSFULLY[0m
+===================================
