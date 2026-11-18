@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package ddimock.ipam.v1;
+
+option go_package = "ddimock/gen/go/ipam/v1;ipamv1";
+
+import "proto/common/types.proto";
+
+service IPAMService {
+
+    rpc CreateNetwork(CreateNetworkRequest)
+        returns (CreateNetworkResponse);
+
+    rpc ListNetworks(ListNetworksRequest)
+        returns (ListNetworksResponse);
+
+    rpc GetNetwork(GetNetworkRequest)
+        returns (GetNetworkResponse);
+
+    rpc DeleteNetwork(DeleteNetworkRequest)
+        returns (DeleteNetworkResponse);
+
+    rpc AllocateIP(AllocateIPRequest)
+        returns (AllocateIPResponse);
+
+    rpc ReleaseIP(ReleaseIPRequest)
+        returns (ReleaseIPResponse);
+
+    rpc GetIP(GetIPRequest)
+        returns (GetIPResponse);
+
+    rpc QuarantineIP(QuarantineIPRequest)
+        returns (QuarantineIPResponse);
+
+    rpc RestoreIP(RestoreIPRequest)
+        returns (RestoreIPResponse);
+}
+
+message CreateNetworkRequest {
+    string cidr = 1;
+    string name = 2;
+    string gateway = 3;
+}
+
+message CreateNetworkResponse {
+    ddimock.common.v1.Network network = 1;
+}
+
+message ListNetworksRequest {
+    ddimock.common.v1.PaginationRequest pagination = 1;
+}
+
+message ListNetworksResponse {
+    repeated ddimock.common.v1.Network networks = 1;
+    ddimock.common.v1.PaginationResponse pagination = 2;
+}
+
+message GetNetworkRequest {
+    string cidr = 1;
+}
+
+message GetNetworkResponse {
+    ddimock.common.v1.Network network = 1;
+}
+
+message DeleteNetworkRequest {
+    string cidr = 1;
+}
+
+message DeleteNetworkResponse {
+    bool success = 1;
+}
+
+message AllocateIPRequest {
+    string network_cidr = 1;
+    string hostname = 2;
+    string mac_address = 3;
+}
+
+message AllocateIPResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}
+
+message ReleaseIPRequest {
+    string address = 1;
+}
+
+message ReleaseIPResponse {
+    bool success = 1;
+}
+
+message GetIPRequest {
+    string address = 1;
+}
+
+message GetIPResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}
+
+message QuarantineIPRequest {
+    string address = 1;
+    string reason = 2;
+}
+
+message QuarantineIPResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}
+
+message RestoreIPRequest {
+    string address = 1;
+}
+
+message RestoreIPResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}

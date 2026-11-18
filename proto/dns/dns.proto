@@ -1,0 +1,143 @@
+syntax = "proto3";
+
+package ddimock.dns.v1;
+
+option go_package = "ddimock/gen/go/dns/v1;dnsv1";
+
+import "google/protobuf/timestamp.proto";
+
+service DNSService {
+
+    rpc CreateZone(CreateZoneRequest)
+        returns (CreateZoneResponse);
+
+    rpc ListZones(ListZonesRequest)
+        returns (ListZonesResponse);
+
+    rpc DeleteZone(DeleteZoneRequest)
+        returns (DeleteZoneResponse);
+
+    rpc AddRecord(AddRecordRequest)
+        returns (AddRecordResponse);
+
+    rpc GetRecord(GetRecordRequest)
+        returns (GetRecordResponse);
+
+    rpc ListRecords(ListRecordsRequest)
+        returns (ListRecordsResponse);
+
+    rpc UpdateRecord(UpdateRecordRequest)
+        returns (UpdateRecordResponse);
+
+    rpc DeleteRecord(DeleteRecordRequest)
+        returns (DeleteRecordResponse);
+
+    rpc Resolve(ResolveRequest)
+        returns (ResolveResponse);
+}
+
+enum RecordType {
+    RECORD_TYPE_UNSPECIFIED = 0;
+    RECORD_TYPE_A = 1;
+    RECORD_TYPE_AAAA = 2;
+    RECORD_TYPE_CNAME = 3;
+    RECORD_TYPE_MX = 4;
+}
+
+message DNSZone {
+    string name = 1;
+    string description = 2;
+    google.protobuf.Timestamp created_at = 3;
+}
+
+message DNSRecord {
+    string id = 1;
+    string zone = 2;
+    string name = 3;
+    RecordType type = 4;
+    string value = 5;
+    int32 ttl = 6;
+    google.protobuf.Timestamp created_at = 7;
+}
+
+message CreateZoneRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message CreateZoneResponse {
+    DNSZone zone = 1;
+}
+
+message ListZonesRequest {}
+
+message ListZonesResponse {
+    repeated DNSZone zones = 1;
+}
+
+message DeleteZoneRequest {
+    string name = 1;
+}
+
+message DeleteZoneResponse {
+    bool success = 1;
+}
+
+message AddRecordRequest {
+    string zone = 1;
+    string name = 2;
+    RecordType type = 3;
+    string value = 4;
+    int32 ttl = 5;
+}
+
+message AddRecordResponse {
+    DNSRecord record = 1;
+}
+
+message GetRecordRequest {
+    string id = 1;
+}
+
+message GetRecordResponse {
+    DNSRecord record = 1;
+}
+
+message ListRecordsRequest {
+    string zone = 1;
+    string name = 2;
+    RecordType type = 3;
+}
+
+message ListRecordsResponse {
+    repeated DNSRecord records = 1;
+}
+
+message UpdateRecordRequest {
+    string id = 1;
+    string value = 2;
+    int32 ttl = 3;
+}
+
+message UpdateRecordResponse {
+    DNSRecord record = 1;
+}
+
+message DeleteRecordRequest {
+    string id = 1;
+}
+
+message DeleteRecordResponse {
+    bool success = 1;
+}
+
+message ResolveRequest {
+    string hostname = 1;
+    RecordType type = 2;
+}
+
+message ResolveResponse {
+    string hostname = 1;
+    repeated string values = 2;
+    RecordType type = 3;
+}

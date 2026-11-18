@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package ddimock.common.v1;
+
+option go_package = "ddimock/gen/go/common/v1;commonv1";
+
+import "google/protobuf/timestamp.proto";
+
+enum IPState {
+    IP_STATE_UNSPECIFIED = 0;
+    IP_STATE_AVAILABLE = 1;
+    IP_STATE_ALLOCATED = 2;
+    IP_STATE_RESERVED = 3;
+    IP_STATE_QUARANTINE = 4;
+}
+
+message Network {
+    string cidr = 1;
+    string name = 2;
+    string gateway = 3;
+    google.protobuf.Timestamp created_at = 4;
+}
+
+message IPAddress {
+    string address = 1;
+    string network_cidr = 2;
+    IPState state = 3;
+    string hostname = 4;
+    string mac_address = 5;
+    string owner = 6;
+    google.protobuf.Timestamp last_updated = 7;
+}
+
+message PaginationRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+}
+
+message PaginationResponse {
+    string next_page_token = 1;
+    int32 total_count = 2;
+}

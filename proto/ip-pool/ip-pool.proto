@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package ddimock.ippool.v1;
+
+option go_package = "ddimock/gen/go/ip_pool/v1;ippoolv1";
+
+import "proto/common/types.proto";
+
+service IPPoolService {
+
+    rpc AllocateAvailableIP(AllocateAvailableIPRequest)
+        returns (AllocateAvailableIPResponse);
+
+    rpc UpdateIPState(UpdateIPStateRequest)
+        returns (UpdateIPStateResponse);
+
+    rpc GetIP(GetIPRequest)
+        returns (GetIPResponse);
+
+    rpc ListIPs(ListIPsRequest)
+        returns (ListIPsResponse);
+
+    rpc AddIP(AddIPRequest)
+        returns (AddIPResponse);
+}
+
+message AllocateAvailableIPRequest {
+    string network_cidr = 1;
+    string hostname = 2;
+    string mac_address = 3;
+    string owner = 4;
+}
+
+message AllocateAvailableIPResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}
+
+message UpdateIPStateRequest {
+    string address = 1;
+    ddimock.common.v1.IPState state = 2;
+    string hostname = 3;
+    string mac_address = 4;
+    string owner = 5;
+}
+
+message UpdateIPStateResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}
+
+message GetIPRequest {
+    string address = 1;
+}
+
+message GetIPResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}
+
+message ListIPsRequest {
+    string network_cidr = 1;
+    ddimock.common.v1.IPState state = 2;
+    ddimock.common.v1.PaginationRequest pagination = 3;
+}
+
+message ListIPsResponse {
+    repeated ddimock.common.v1.IPAddress ips = 1;
+    ddimock.common.v1.PaginationResponse pagination = 2;
+}
+
+message AddIPRequest {
+    string address = 1;
+    string network_cidr = 2;
+}
+
+message AddIPResponse {
+    ddimock.common.v1.IPAddress ip = 1;
+}

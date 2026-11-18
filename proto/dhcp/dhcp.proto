@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package ddimock.dhcp.v1;
+
+option go_package = "ddimock/gen/go/dhcp/v1;dhcpv1";
+
+import "google/protobuf/timestamp.proto";
+
+service DHCPService {
+
+    rpc CreateScope(CreateScopeRequest)
+        returns (CreateScopeResponse);
+
+    rpc ListScopes(ListScopesRequest)
+        returns (ListScopesResponse);
+
+    rpc GetScope(GetScopeRequest)
+        returns (GetScopeResponse);
+
+    rpc DeleteScope(DeleteScopeRequest)
+        returns (DeleteScopeResponse);
+
+    rpc ListLeases(ListLeasesRequest)
+        returns (ListLeasesResponse);
+
+    rpc GetLease(GetLeaseRequest)
+        returns (GetLeaseResponse);
+
+    rpc ReleaseLease(ReleaseLeaseRequest)
+        returns (ReleaseLeaseResponse);
+
+    rpc CreateReservation(CreateReservationRequest)
+        returns (CreateReservationResponse);
+
+    rpc ListReservations(ListReservationsRequest)
+        returns (ListReservationsResponse);
+
+    rpc DeleteReservation(DeleteReservationRequest)
+        returns (DeleteReservationResponse);
+}
+
+message DHCPScope {
+    string id = 1;
+    string network_cidr = 2;
+    string range_start = 3;
+    string range_end = 4;
+    int32 lease_time_seconds = 5;
+    bool enabled = 6;
+}
+
+message DHCPLease {
+    string ip_address = 1;
+    string mac_address = 2;
+    string hostname = 3;
+    google.protobuf.Timestamp leased_at = 4;
+    google.protobuf.Timestamp expires_at = 5;
+}
+
+message DHCPReservation {
+    string id = 1;
+    string ip_address = 2;
+    string mac_address = 3;
+    string hostname = 4;
+}
+
+message CreateScopeRequest {
+    string network_cidr = 1;
+    string range_start = 2;
+    string range_end = 3;
+    int32 lease_time_seconds = 4;
+}
+
+message CreateScopeResponse {
+    DHCPScope scope = 1;
+}
+
+message ListScopesRequest {}
+
+message ListScopesResponse {
+    repeated DHCPScope scopes = 1;
+}
+
+message GetScopeRequest {
+    string id = 1;
+}
+
+message GetScopeResponse {
+    DHCPScope scope = 1;
+}
+
+message DeleteScopeRequest {
+    string id = 1;
+}
+
+message DeleteScopeResponse {
+    bool success = 1;
+}
+
+message ListLeasesRequest {
+    string network_cidr = 1;
+}
+
+message ListLeasesResponse {
+    repeated DHCPLease leases = 1;
+}
+
+message GetLeaseRequest {
+    string ip_address = 1;
+}
+
+message GetLeaseResponse {
+    DHCPLease lease = 1;
+}
+
+message ReleaseLeaseRequest {
+    string ip_address = 1;
+}
+
+message ReleaseLeaseResponse {
+    bool success = 1;
+}
+
+message CreateReservationRequest {
+    string ip_address = 1;
+    string mac_address = 2;
+    string hostname = 3;
+}
+
+message CreateReservationResponse {
+    DHCPReservation reservation = 1;
+}
+
+message ListReservationsRequest {
+    string network_cidr = 1;
+}
+
+message ListReservationsResponse {
+    repeated DHCPReservation reservations = 1;
+}
+
+message DeleteReservationRequest {
+    string id = 1;
+}
+
+message DeleteReservationResponse {
+    bool success = 1;
+}
